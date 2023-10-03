@@ -134,25 +134,68 @@ ALTER TABLE TARIFA
                                                 
 
 
+INSERT INTO COMPAÑIA(cif, nombre, web)
+VALUES ('A00000001', 'Kietostar', 'http://www.kietostar.com');
 
+INSERT INTO COMPAÑIA(CIF, NOMBRE, WEB)
+VALUES ('B00000002', 'Aotra', 'http://www.aotra.com');
+
+
+
+INSERT INTO TARIFA(tarifa, compañia, descripcion, coste)
+VALUES ('joven', 'A00000001', 'menores de 25 años', 0.25);
+
+INSERT INTO tarifa (tarifa, compañia, descripcion, coste)
+VALUES ('dúo', 'A00000001', 'la pareja también está en la compañía', 0.20);
+
+INSERT INTO tarifa (tarifa, compañia, descripcion, coste)
+VALUES ('familiar', 'A00000001', '4 miembros de la familia en la compañía', 0.15);
+
+INSERT INTO tarifa (tarifa, compañia, descripcion, coste)
+VALUES ('autónomos', 'B00000002', 'trabajador autónomo', 0.12);
+
+INSERT INTO tarifa (tarifa, compañia, descripcion, coste)
+VALUES ('dúo', 'B00000002', 'la pareja también está en la compañía', 0.15);
+
+
+
+--  _______        __   _______ .______        ______  __    ______  __    ______       _  _    
+-- |   ____|      |  | |   ____||   _  \      /      ||  |  /      ||  |  /  __  \     | || |   
+-- |  |__         |  | |  |__   |  |_)  |    |  ,----'|  | |  ,----'|  | |  |  |  |    | || |_  
+-- |   __|  .--.  |  | |   __|  |      /     |  |     |  | |  |     |  | |  |  |  |    |__   _| 
+-- |  |____ |  `--'  | |  |____ |  |\  \----.|  `----.|  | |  `----.|  | |  `--'  |       | |   
+-- |_______| \______/  |_______|| _| `._____| \______||__|  \______||__|  \______/        |_|   
+                                                                                             
+
+-- SQL Error [1] [23000]: ORA-00001: unique constraint (BD_034.SYS_C0064068) violated
 INSERT INTO COMPAÑIA(cif, nombre, web) 
 VALUES ('A00000001', 'Petafón', 'http://www.petafón.com');
 
+-- SQL Error [1] [23000]: ORA-00001: unique constraint (BD_034.NOMBRE_UNICO) violated
 INSERT INTO COMPAÑIA 
 VALUES ('C00000003', 'Aotra', 'http://www.aot.com');
 
--- Peta porque no hay compañia con este CIF
+-- SQL Error [2291] [23000]: ORA-02291: integrity constraint (BD_034.FK_COMPAÑIA) violated - parent key not found
 INSERT INTO TARIFA
 VALUES ('joven', 'D00000004', 'menores de 21 años', 0.20);
 
--- Peta porque no hay compañia con este CIF
+-- SQL Error [1] [23000]: ORA-00001: unique constraint (BD_034.PK_TARIFA) violated
 INSERT INTO TARIFA
 VALUES ('dúo', 'B00000002', 'la pareja también está en la compañía', 0.18);
 
--- Peta porque no hay compañia con este CIF
+-- SQL Error [2290] [23000]: ORA-02290: check constraint (BD_034.LIMITE_PRECIO) violated
 INSERT INTO TARIFA
 VALUES ('amigos', 'B00000002', '10 amigos están también en la compañía', 1.60);
 
 
+--   _______        __   _______ .______        ______  __    ______  __    ______       _____  
+--  |   ____|      |  | |   ____||   _  \      /      ||  |  /      ||  |  /  __  \     | ____| 
+--  |  |__         |  | |  |__   |  |_)  |    |  ,----'|  | |  ,----'|  | |  |  |  |    | |__   
+--  |   __|  .--.  |  | |   __|  |      /     |  |     |  | |  |     |  | |  |  |  |    |___ \  
+--  |  |____ |  `--'  | |  |____ |  |\  \----.|  `----.|  | |  `----.|  | |  `--'  |     ___) | 
+--  |_______| \______/  |_______|| _| `._____| \______||__|  \______||__|  \______/     |____/  
+--                                                                                                                                                                               
 
-
+-- Si se borran las tarifas jeje.
+DELETE FROM COMPAÑIA 
+WHERE CIF = 'B00000002';
