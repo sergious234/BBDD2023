@@ -1,26 +1,14 @@
-CREATE TABLE TANQUES(
-	nomTanque varchar2(20) NOT NULL,
-	dmg number(3,0) NOT NULL,
-	velocidadFwd number(3,2) NOT NULL,
-	velocidadBck number(3,2) NOT NULL,
-	dispersion number(1,3) NOT NULL,
-	hp number(4,0) NOT NULL,
-	CONSTRAINT dmgGTZero
-		CHECK(dmg > 0),
-	CONSTRAINT velocidadFwdLimit
-		CHECK(velocidadFwd > 0.0),
-	CONSTRAINT velocidadBckLimit
-		CHECK(velocidadBck < 0.0),
-	CONSTRAINT dispersionGTZero
-		CHECK(dispersion >= 0.00),
-	CONSTRAINT HPGTZero
-		CHECK(hp > 0)
-);
 
 
-ALTER TABLE TANQUES
-	ADD CONSTRAINT clavePrimeraia PRIMARY KEY (nomTanque)
-;
+--   ______ .______       _______     ___   .___________. _______     _______.
+--  /      ||   _  \     |   ____|   /   \  |           ||   ____|   /       |
+-- |  ,----'|  |_)  |    |  |__     /  ^  \ `---|  |----`|  |__     |   (----`
+-- |  |     |      /     |   __|   /  /_\  \    |  |     |   __|     \   \    
+-- |  `----.|  |\  \----.|  |____ /  _____  \   |  |     |  |____.----)   |   
+--  \______|| _| `._____||_______/__/     \__\  |__|     |_______|_______/    
+                                                                           
+
+
 
 CREATE TABLE COMPAÑIA(
 	cif char(9) PRIMARY KEY,
@@ -87,6 +75,17 @@ CREATE TABLE LLAMADA(
 	CONSTRAINT tf_destino_unico 
 		UNIQUE(tf_destino, fecha_hora)
 );
+
+
+
+--     ___       __      .___________. _______ .______          _______.
+--    /   \     |  |     |           ||   ____||   _  \        /       |
+--   /  ^  \    |  |     `---|  |----`|  |__   |  |_)  |      |   (----`
+--  /  /_\  \   |  |         |  |     |   __|  |      /        \   \    
+-- /  _____  \  |  `----.    |  |     |  |____ |  |\  \----.----)   |   
+--/__/     \__\ |_______|    |__|     |_______|| _| `._____|_______/    
+                                                                      
+
 
 
 ALTER TABLE COMPAÑIA 
