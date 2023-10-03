@@ -33,13 +33,14 @@ CREATE TABLE CLIENTE(
 	FECHA_NAC DATE,
 	DIRECCION VARCHAR(100),
 	CP CHAR(6),
+	CIUDAD VARCHAR(50),
 	PROVINCIA VARCHAR(50)
 );
 
 CREATE TABLE TELEFONO(
 	NUMERO CHAR(9),
 	FECHA_ALTA DATE,
-	TIPO VARCHAR(10),
+	TIPO CHAR(1),
 	PUNTOS NUMBER(6,0),
 	COMPAÑIA CHAR(9),
 	TARIFA VARCHAR(10),
@@ -85,8 +86,6 @@ CREATE TABLE LLAMADA(
 -- /  _____  \  |  `----.    |  |     |  |____ |  |\  \----.----)   |   
 --/__/     \__\ |_______|    |__|     |_______|| _| `._____|_______/    
                                                                       
-
-
 
 ALTER TABLE COMPAÑIA 
 	ADD CONSTRAINT nombre_unico UNIQUE(NOMBRE);
