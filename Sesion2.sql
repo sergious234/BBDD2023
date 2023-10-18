@@ -8,6 +8,13 @@
 
 
 
+--  ███████ ███████ ███████ ███████ ██  ██████  ███    ██      ██ 
+--  ██      ██      ██      ██      ██ ██    ██ ████   ██     ███ 
+--  ███████ █████   ███████ █████   ██ ██    ██ ██ ██  ██      ██ 
+--       ██ ██           ██ ██      ██ ██    ██ ██  ██ ██      ██ 
+--  ███████ ███████ ███████ ███████ ██  ██████  ██   ████      ██ 
+                                                             
+
 -- S1.1 Obtener el nombre de las compañías cuya dirección web contenga la cadena ‘et’ y acabe en ‘com’.
 
 SELECT NOMBRE
@@ -82,8 +89,8 @@ WHERE EXTRACT(MONTH FROM T.F_CONTRATO) = 5
 -- el ‘654345345’ durante el mes de octubre y noviembre, cuyas llamadas 
 -- hayan tenido una duración superior a los 250 segundos.
 
-SELECT DISTINCT(T.NUMERO)
-FROM MF.TELEFONO T INNER JOIN MF.LLAMADA L ON L.TF_ORIGEN = T.NUMERO 
+SELECT DISTINCT(L.TF_DESTINO)
+FROM MF.LLAMADA L  
 WHERE L.TF_ORIGEN = '654345345' 
 	AND EXTRACT(MONTH FROM L.FECHA_HORA) BETWEEN 10 AND 11
 	AND DURACION > 250;
@@ -100,3 +107,60 @@ FROM MF.CLIENTE C
 WHERE EXTRACT(YEAR FROM C.F_NAC) BETWEEN 1970 AND 1985
 	AND C.PROVINCIA = 'Huelva'
 ORDER BY C.CIUDAD ASC, C.PROVINCIA DESC; 
+
+
+
+
+--  ███████ ███████ ███████ ███████ ██  ██████  ███    ██     ██████  
+--  ██      ██      ██      ██      ██ ██    ██ ████   ██          ██ 
+--  ███████ █████   ███████ █████   ██ ██    ██ ██ ██  ██      █████  
+--       ██ ██           ██ ██      ██ ██    ██ ██  ██ ██     ██      
+--  ███████ ███████ ███████ ███████ ██  ██████  ██   ████     ███████ 
+                                                                    
+
+-- S2.1 Mostrar el código y coste de las tarifas junto con el nombre de la compañía que las 
+-- ofrecen, de aquellas tarifas cuya descripción indique que otras personas deben estar 
+-- también en la misma compañía.
+
+SELECT T.COMPAÑIA, T.COSTE, C.NOMBRE 
+FROM MF.TARIFA T INNER JOIN MF.COMPAÑIA C ON T.COMPAÑIA = C.CIF 
+WHERE T.DESCRIPCION LIKE '%en la compañía';
+
+-- S2.2 Nombre y número de teléfonos de aquellos abonados con contrato que 
+-- tienen tarifas inferiores a 0,20 €.
+
+SELECT T.NUMERO, C.NOMBRE 
+FROM MF.TELEFONO T 
+	INNER JOIN MF.TARIFA TAR ON T.TARIFA =TAR.TARIFA 
+	INNER JOIN MF.CLIENTE C ON C.DNI = T.CLIENTE 
+WHERE TAR.COSTE < 0.2;
+
+-- S2.3 Obtener el código de las tarifas, el nombre de las compañías, los números 
+-- de teléfono y los puntos, de aquellos teléfonos que se contrataron en el año 2006 
+-- y que hayan obtenido más de 200 puntos
+
+SELECT T.NUMERO, T.PUNTOS, C.NOMBRE 
+FROM MF.TARIFA TAR
+	INNER JOIN MF.TELEFONO T ON T.TARIFA = TAR.TARIFA
+	INNER JOIN MF.COMPAÑIA C ON C.CIF = TAR.COMPAÑIA 
+WHERE T.PUNTOS > 200 AND EXTRACT(YEAR FROM T.F_CONTRATO) = 2006;
+
+-- S2.4 Obtener los números de teléfono (origen y destino), así como el tipo de contrato, 
+-- de los clientes que alguna vez hablaron por teléfono entre las 8 y las 10 de la mañana
+
+SELECT LL.TF_ORIGEN, LL.TF_DESTINO, TEL.TIPO
+FROM MF.TELEFONO TEL
+	INNER JOIN MF.LLAMADA LL ON LL.TF_ORIGEN = TEL.NUMERO 
+WHERE EXTRACT(HOUR FROM LL.FECHA_HORA) BETWEEN 8 AND 10;
+
+-- S2.5 Interesa conocer los nombres y números de teléfono de los clientes (origen y destino) que, 
+-- perteneciendo a compañías distintas, mantuvieron llamadas que superaron los 15 minutos. 
+-- Se desea conocer, también, la fecha y la hora de dichas llamadas así como la 
+-- duración de esas llamada
+
+SELECT TEL.COMPAÑIA, C.NOMBRE, LLA.TF_ORIGEN, LLA.TF_DESTINO, LLA.DURACION, LLA.FECHA_HORA
+FROM MF.CLIENTE C
+	INNER JOIN MF.TELEFONO TEL ON TEL.CLIENTE = C.DNI
+	INNER JOIN MF.LLAMADA LLA ON LLA.TF_ORIGEN = TEL.NUMERO
+	INNER JOIN MF.TELEFONO DEST ON DEST.NUMERO = LLA.TF_DESTINO 
+WHERE LLA.DURACION > 15*60 AND TEL.COMPAÑIA <> DEST.COMPAÑIA;
