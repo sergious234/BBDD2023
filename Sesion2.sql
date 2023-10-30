@@ -164,3 +164,82 @@ FROM MF.CLIENTE C
 	INNER JOIN MF.LLAMADA LLA ON LLA.TF_ORIGEN = TEL.NUMERO
 	INNER JOIN MF.TELEFONO DEST ON DEST.NUMERO = LLA.TF_DESTINO 
 WHERE LLA.DURACION > 15*60 AND TEL.COMPAÑIA <> DEST.COMPAÑIA;
+
+
+--  ███████ ███████ ███████ ██  ██████  ███    ██     ██████  
+--  ██      ██      ██      ██ ██    ██ ████   ██          ██ 
+--  ███████ █████   ███████ ██ ██    ██ ██ ██  ██      █████  
+--       ██ ██           ██ ██ ██    ██ ██  ██ ██          ██ 
+--  ███████ ███████ ███████ ██  ██████  ██   ████     ██████  
+                                                            
+
+-- S3.1 Obtener la fecha (día-mes-año) en la que se realizó la llamada de mayor duración
+
+
+SELECT TO_CHAR(LLA.FECHA_HORA, 'DD-MM-YYYY')
+FROM MF.LLAMADA LLA
+WHERE LLA.DURACION = (
+	SELECT MAX(LLA.DURACION)
+	FROM MF.LLAMADA LLA
+);  
+
+
+-- S3.2 Obtener el nombre de los abonados de la compañía ‘Aotra’ con 
+-- el mismo tipo de tarifa que la del teléfono "654123321"
+
+
+SELECT CLI.NOMBRE 
+FROM MF.CLIENTE CLI
+	INNER JOIN MF.TELEFONO TEL ON TEL.CLIENTE = CLI.DNI
+WHERE TEL.COMPAÑIA = (
+	SELECT CIF 
+	FROM MF.COMPAÑIA COM
+	WHERE NOMBRE = 'Aotra'
+) AND 
+TEL.TARIFA = (
+	SELECT PHN.TARIFA
+	FROM MF.TELEFONO PHN
+	WHERE PHN.NUMERO = '654123321'
+);
+
+-- S3.3 Mostrar, utilizando para ello una subconsulta, el número de teléfono, 
+-- fecha de contrato y tipo de los abonados que han llamado a teléfonos de 
+-- clientes de fuera de la provincia de La Coruña durante el mes de octubre de 2006.
+
+
+SELECT DISTINCT(TF_ORIGEN), TEL.F_CONTRATO, TEL.TIPO 
+FROM MF.LLAMADA LLA
+	INNER JOIN MF.TELEFONO TEL ON TEL.NUMERO = LLA.TF_ORIGEN 
+WHERE TO_CHAR(LLA.FECHA_HORA, 'mm-yyyy') = '10-2006' AND  LLA.TF_DESTINO IN (
+	SELECT PHN.NUMERO 
+	FROM MF.TELEFONO PHN
+		INNER JOIN MF.CLIENTE CLI ON CLI.DNI = PHN.CLIENTE 
+	WHERE CLI.PROVINCIA <> 'La Coruña'
+);
+
+
+-- S3.4 Se necesita conocer el nombre de los clientes que tienen teléfonos con 
+-- tarifa “dúo” pero no “autónomos”. Utiliza subconsultas para obtener la solución.
+
+SELECT CLI.NOMBRE 
+FROM MF.TELEFONO TEL
+	INNER JOIN MF.CLIENTE CLI ON CLI.DNI = TEL.CLIENTE 
+WHERE TEL.TARIFA = 'dúo' AND TEL.TARIFA NOT IN (
+	SELECT PHN.NUMERO 
+	FROM MF.TELEFONO PHN
+	WHERE PHN.TARIFA = 'autónomos'
+);
+
+-- S3.5 Obtener mediante subconsultas los nombres de clientes y números de teléfono 
+-- que aquellos que hicieron llamadas a teléfonos de la compañía Petafón pero no Aotra
+
+
+
+-- S3.6 Nombre de los clientes de la compañía Kietostar que hicieron las llamadas 
+-- de mayor duración en septiembre de 2006
+
+
+-- S3.7 Se necesita conocer el nombre de los clientes que tienen teléfonos con fecha 
+-- de contratación anterior a alguno de los teléfonos de Ramón Martínez Sabina, excluido, 
+-- claro, el propio Ramón Martínez Sabina.
+
