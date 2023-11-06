@@ -249,13 +249,35 @@ WHERE COM_D.NOMBRE = 'Petafón' and LLA.TF_DESTINO NOT IN (
 
 -- S3.6 Nombre de los clientes de la compañía Kietostar que hicieron las llamadas 
 -- de mayor duración en septiembre de 2006
+SELECT cli.nombre, lla.duracion
+FROM mf.CLIENTE cli
+	INNER JOIN mf.TELEFONO tel ON tel.CLIENTE = cli.DNI 
+	INNER JOIN mf.LLAMADA lla ON lla.tf_origen = tel.NUMERO
+	INNER JOIN mf.COMPAÑIA c ON c.cif = tel.compañia
+WHERE c.nombre  = 'Kietostar' AND EXTRACT(YEAR FROM lla.FECHA_HORA) = 2006
+ORDER BY lla.DURACION DESC;
 
 
 -- S3.7 Se necesita conocer el nombre de los clientes que tienen teléfonos con fecha 
 -- de contratación anterior a alguno de los teléfonos de Ramón Martínez Sabina, excluido, 
 -- claro, el propio Ramón Martínez Sabina.
 
+SELECT cli.nombre, tel.f_contrato
+FROM mf.cliente cli
+	INNER JOIN mf.telefono tel ON tel.cliente = cli.DNI 
+WHERE cli.nombre <> 'Ramón Martínez Sabina' and tel.F_CONTRATO < ANY (
+	SELECT tel_rms.F_CONTRATO
+	FROM MF.cliente rms
+		INNER JOIN mf.telefono tel_rms ON tel_rms.cliente = rms.dni
+	WHERE rms.nombre = 'Ramón Martínez Sabina'
+);
 
+
+--  ███████ ███████ ███████ ███████ ██  ██████  ███    ██     ██   ██ 
+--  ██      ██      ██      ██      ██ ██    ██ ████   ██     ██   ██ 
+--  ███████ █████   ███████ █████   ██ ██    ██ ██ ██  ██     ███████ 
+--       ██ ██           ██ ██      ██ ██    ██ ██  ██ ██          ██ 
+--  ███████ ███████ ███████ ███████ ██  ██████  ██   ████          ██ 
 
 -- S4.1 Utilizando consultas correlacionadas, mostrar el nombre de los abonados que han 
 -- llamado el día ‘16/10/06’
@@ -311,16 +333,15 @@ WHERE tel.NUMERO IN (
 -- los clientes de la compañía Kietostar que no han hecho llamadas a
 -- otros teléfonos de la misma compañía
 
-SELECT lla.*, com.*
+SELECT DISTINCT(cli.nombre), tel.numero
 FROM mf.CLIENTE cli
 	INNER JOIN mf.TELEFONO tel ON cli.DNI = tel.CLIENTE
 	INNER JOIN mf.COMPAÑIA com ON com.cif = tel.COMPAÑIA 
 	INNER JOIN mf.LLAMADA lla ON lla.tf_origen = tel.numero
-WHERE com.nombre = 'Kietostar' AND lla.tf_origen NOT IN (
-	SELECT lla2.tf_origen
-	FROM mf.LLAMADA lla2
-	INNER JOIN mf.TELEFONO tel_des ON tel_des.numero = lla2.tf_destino
+WHERE com.nombre = 'Kietostar' AND lla.tf_destino NOT IN (
+	SELECT tel_des.numero 
+	from mf.TELEFONO tel_des 	
 	INNER JOIN mf.compañia com_des ON com_des.cif = tel_des.compañia
-	WHERE lla2.tf_origen = tel.numero AND com_des.cif = com.cif 
+	WHERE com_des.nombre = 'Kietostart' 
 );
 
