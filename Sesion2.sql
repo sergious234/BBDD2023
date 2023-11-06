@@ -233,6 +233,18 @@ WHERE TEL.TARIFA = 'dúo' AND TEL.TARIFA NOT IN (
 -- S3.5 Obtener mediante subconsultas los nombres de clientes y números de teléfono 
 -- que aquellos que hicieron llamadas a teléfonos de la compañía Petafón pero no Aotra
 
+SELECT DISTINCT(CLI.NOMBRE), TEL.NUMERO, TEL_D.COMPAÑIA  
+FROM MF.CLIENTE CLI
+	INNER JOIN MF.TELEFONO TEL ON TEL.CLIENTE = CLI.DNI 
+	INNER JOIN MF.LLAMADA LLA ON LLA.TF_ORIGEN = TEL.NUMERO 
+	INNER JOIN MF.TELEFONO TEL_D ON TEL_D.NUMERO = LLA.TF_DESTINO
+	INNER JOIN MF.COMPAÑIA COM_D ON COM_D.CIF = TEL_D.COMPAÑIA
+WHERE COM_D.NOMBRE = 'Petafón' and LLA.TF_DESTINO NOT IN (
+	SELECT TEL2.NUMERO
+	FROM MF.TELEFONO TEL2
+		INNER JOIN COMPAÑIA COM2 ON COM2.CIF = TEL2.COMPAÑIA
+	WHERE COM2.NOMBRE = 'Aotra'
+);
 
 
 -- S3.6 Nombre de los clientes de la compañía Kietostar que hicieron las llamadas 
@@ -242,4 +254,73 @@ WHERE TEL.TARIFA = 'dúo' AND TEL.TARIFA NOT IN (
 -- S3.7 Se necesita conocer el nombre de los clientes que tienen teléfonos con fecha 
 -- de contratación anterior a alguno de los teléfonos de Ramón Martínez Sabina, excluido, 
 -- claro, el propio Ramón Martínez Sabina.
+
+
+
+-- S4.1 Utilizando consultas correlacionadas, mostrar el nombre de los abonados que han 
+-- llamado el día ‘16/10/06’
+
+SELECT DISTINCT(CLI.NOMBRE)
+FROM MF.CLIENTE CLI
+	INNER JOIN MF.TELEFONO TEL ON CLI.DNI = TEL.CLIENTE  
+	INNER JOIN MF.LLAMADA LLA ON LLA.TF_ORIGEN = TEL.NUMERO 
+WHERE to_char(LLA.FECHA_HORA, 'dd/mm/yyyy') = '16/10/2006';
+
+
+-- S4.2 Utilizando consultas correlacionadas, obtener el nombre de los abonados que han 
+-- realizado llamadas de menos de 1 minuto y medio
+
+SELECT cli.NOMBRE 
+FROM mf.CLIENTE cli 
+	INNER JOIN mf.TELEFONO tel ON tel.CLIENTE = cli.DNI 
+	INNER JOIN mf.LLAMADA lla ON tel.NUMERO = LLA.TF_ORIGEN 
+WHERE lla.DURACION < 90;
+
+
+-- S4.3 Utilizando consultas correlacionadas, obtener el nombre de los abonados de la 
+-- compañía ‘KietoStar’ que no hicieron ninguna llamada el mes de septiembre
+
+SELECT cli.NOMBRE 
+FROM mf.CLIENTE cli
+	INNER JOIN MF.TELEFONO tel ON tel.CLIENTE = cli.DNI 
+	INNER JOIN mf.COMPAÑIA c ON c.cif = tel.COMPAÑIA 
+WHERE c.NOMBRE = 'Kietostar' and tel.NUMERO NOT IN (
+	SELECT lla.tf_origen
+	FROM mf.LLAMADA lla
+	WHERE EXTRACT(MONTH FROM LLA.FECHA_HORA) = 9
+);
+
+	
+--S4.4 Utilizando consultas correlacionadas, mostrar todos los datos de los telefonos
+-- que hayan llamado al número 654234234 pero no al 666789789
+
+SELECT *
+FROM mf.TELEFONO tel
+WHERE tel.NUMERO IN (
+	SELECT lla.tf_origen
+	FROM mf.LLAMADA lla
+	WHERE tel.NUMERO = lla.tf_origen AND lla.tf_destino = '654234234'
+) AND tel.NUMERO NOT IN (
+	SELECT lla2.tf_origen
+	FROM mf.LLAMADA lla2
+	WHERE tel.NUMERO = lla2.tf_origen AND lla2.tf_destino = '666789789'
+);
+
+
+--S4.5 Utilizando consultas correlacionadas, obtener el nombre y número de teléfono de
+-- los clientes de la compañía Kietostar que no han hecho llamadas a
+-- otros teléfonos de la misma compañía
+
+SELECT lla.*, com.*
+FROM mf.CLIENTE cli
+	INNER JOIN mf.TELEFONO tel ON cli.DNI = tel.CLIENTE
+	INNER JOIN mf.COMPAÑIA com ON com.cif = tel.COMPAÑIA 
+	INNER JOIN mf.LLAMADA lla ON lla.tf_origen = tel.numero
+WHERE com.nombre = 'Kietostar' AND lla.tf_origen NOT IN (
+	SELECT lla2.tf_origen
+	FROM mf.LLAMADA lla2
+	INNER JOIN mf.TELEFONO tel_des ON tel_des.numero = lla2.tf_destino
+	INNER JOIN mf.compañia com_des ON com_des.cif = tel_des.compañia
+	WHERE lla2.tf_origen = tel.numero AND com_des.cif = com.cif 
+);
 
